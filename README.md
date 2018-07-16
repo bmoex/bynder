@@ -46,4 +46,3 @@ Next got the the extension configuration of EXT:bynder and fill in the needed ur
 - Contact support@beech.it
  
 
- 
