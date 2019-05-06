@@ -13,7 +13,6 @@ use TYPO3\CMS\Core\Resource\FileInterface;
 use TYPO3\CMS\Core\Resource\Folder;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * Class BynderVideoHelper
@@ -144,9 +143,11 @@ class BynderHelper extends \TYPO3\CMS\Core\Resource\OnlineMedia\Helpers\Abstract
     public function extractMetaData($identifier, $propertiesToExtract = [])
     {
         try {
-            $mediaInfo = $mediaInfo = $this->getBynderMediaInfo($identifier);
+            $mediaInfo = $this->getBynderMediaInfo($identifier);
             return $this->extractFileInformation($mediaInfo, $propertiesToExtract);
         } catch (\Exception $e) {
+            $logger = GeneralUtility::makeInstance(\TYPO3\CMS\Core\Log\LogManager::class)->getLogger(__CLASS__);
+            $logger->critical($e->getMessage(), ['exception' => $e]);
         }
         return [];
     }
@@ -212,13 +213,13 @@ class BynderHelper extends \TYPO3\CMS\Core\Resource\OnlineMedia\Helpers\Abstract
             case 'ctime':
                 return strtotime($mediaInfo['dateCreated']);
             case 'name':
-                return $mediaInfo['name'] . '.bynder';
+                return $mediaInfo['name'] . '.' . $this->getInternalExtensionByType($mediaInfo['type']);
             case 'mimetype':
                 return 'bynder/' . $mediaInfo['type'];
             case 'identifier':
                 return $mediaInfo['id'];
             case 'extension':
-                return 'bynder';
+                return $this->getInternalExtensionByType($mediaInfo['type']);
             case 'identifier_hash':
                 return sha1($mediaInfo['id']);
             case 'storage':
@@ -320,5 +321,27 @@ class BynderHelper extends \TYPO3\CMS\Core\Resource\OnlineMedia\Helpers\Abstract
         }
         $info = pathinfo($url);
         return $temporaryPath . $info['filename'] . '.' . $info['extension'];
+    }
+
+    /**
+     * @param string $type
+     * @return string
+     */
+    protected function getInternalExtensionByType($type): string
+    {
+        $extension = 'bynder';
+        switch ($type) {
+            case BynderDriver::ASSET_TYPE_IMAGE:
+                return $extension . '.jpg';
+            case BynderDriver::ASSET_TYPE_DOCUMENT:
+                return $extension . '.pdf';
+            case BynderDriver::ASSET_TYPE_VIDEO:
+                return $extension . '.mp4';
+            case BynderDriver::ASSET_TYPE_AUDIO:
+                return $extension . '.mp3';
+            default:
+                return $extension;
+        }
+
     }
 }

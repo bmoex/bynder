@@ -7,6 +7,7 @@ namespace BeechIt\Bynder\Backend;
  * Date: 19-2-18
  * All code (c) Beech.it all rights reserved
  */
+
 use BeechIt\Bynder\Resource\BynderDriver;
 use BeechIt\Bynder\Utility\ConfigurationUtility;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
@@ -35,7 +36,7 @@ class InlineControlContainer extends \TYPO3\CMS\Backend\Form\Container\InlineCon
             // Inject button before help-block
             if (strpos($selector, '</div><div class="help-block">') > 0) {
                 $selector = str_replace('</div><div class="help-block">', $button . '</div><div class="help-block">', $selector);
-                // Try to inject it into the form-control container
+            // Try to inject it into the form-control container
             } elseif (preg_match('/<\/div><\/div>$/i', $selector)) {
                 $selector = preg_replace('/<\/div><\/div>$/i', $button . '</div></div>', $selector);
             } else {
@@ -55,24 +56,25 @@ class InlineControlContainer extends \TYPO3\CMS\Backend\Form\Container\InlineCon
         $languageService = $this->getLanguageService();
 
         if (!$this->bynderStorageAvailable()) {
-            $errorText = htmlspecialchars($languageService->sL('LLL:EXT:bynder/Resources/Private/Language/locallang_be.xlf:compact_view.error-no-storage-access'));
-            return '&nbsp;<div class="alert alert-danger" style="display: inline-block">
-                ' . $this->iconFactory->getIcon('actions-bynder-compact-view', Icon::SIZE_SMALL)->render() . '
-                ' . $errorText . '
-                </div>';
+            $errorTextHtml = [];
+            $errorTextHtml[] = '<div class="alert alert-danger" style="display: inline-block">';
+            $errorTextHtml[] = $this->iconFactory->getIcon('actions-bynder-compact-view', Icon::SIZE_SMALL)->render();
+            $errorTextHtml[] = htmlspecialchars($languageService->sL('LLL:EXT:bynder/Resources/Private/Language/locallang_be.xlf:compact_view.error-no-storage-access'));
+            $errorTextHtml[] = '</div>';
+
+            return LF . implode(LF, $errorTextHtml);
         }
 
         $groupFieldConfiguration = $inlineConfiguration['selectorOrUniqueConfiguration']['config'];
 
         $foreign_table = $inlineConfiguration['foreign_table'];
-        $allowed = $groupFieldConfiguration['allowed'];
         $allowedAssetTypes = ConfigurationUtility::getAssetTypesByAllowedElements($groupFieldConfiguration['appearance']['elementBrowserAllowed']);
         $currentStructureDomObjectIdPrefix = $this->inlineStackProcessor->getCurrentStructureDomObjectIdPrefix($this->data['inlineFirstPid']);
-        $objectPrefix = $currentStructureDomObjectIdPrefix . '-' . $foreign_table;
-        $nameObject = $currentStructureDomObjectIdPrefix;
 
+        $element = 'bynder' . $this->inlineData['config'][$currentStructureDomObjectIdPrefix]['md5'];
         $compactViewUrl = BackendUtility::getModuleUrl('bynder_compact_view', [
-            'element' => 'bynder' . $this->inlineData['config'][$nameObject]['md5'],
+            'element' => $element,
+            'irreObject' => $currentStructureDomObjectIdPrefix . '-' . $foreign_table,
             'assetTypes' => implode(',', $allowedAssetTypes)
         ]);
 
@@ -80,18 +82,14 @@ class InlineControlContainer extends \TYPO3\CMS\Backend\Form\Container\InlineCon
         $buttonText = htmlspecialchars($languageService->sL('LLL:EXT:bynder/Resources/Private/Language/locallang_be.xlf:compact_view.button'));
         $titleText = htmlspecialchars($languageService->sL('LLL:EXT:bynder/Resources/Private/Language/locallang_be.xlf:compact_view.header'));
 
-        $button = '
-            <span class="btn btn-default t3js-bynder-compact-view-btn bynder' . $this->inlineData['config'][$nameObject]['md5'] . '"
-                data-bynder-compact-view-url="' . htmlspecialchars($compactViewUrl) . '"
-                data-title="' . htmlspecialchars($titleText) . '"
-                data-file-irre-object="' . htmlspecialchars($objectPrefix) . '"
-                data-file-allowed="' . htmlspecialchars($allowed) . '"
-                >
-                ' . $this->iconFactory->getIcon('actions-bynder-compact-view', Icon::SIZE_SMALL)->render() . '
-                ' . $buttonText .
-            '</span>';
-
-        return $button;
+        $buttonHtml = [];
+        $buttonHtml[] = '<a href="#" class="btn btn-default t3js-bynder-compact-view-btn ' . $element . '"'
+            . ' data-bynder-compact-view-url="' . htmlspecialchars($compactViewUrl) . '" '
+            . ' data-title="' . htmlspecialchars($titleText) . '">';
+        $buttonHtml[] = $this->iconFactory->getIcon('actions-bynder-compact-view', Icon::SIZE_SMALL)->render();
+        $buttonHtml[] = $buttonText;
+        $buttonHtml[] = '</a>';
+        return LF . implode(LF, $buttonHtml);
     }
 
     /**

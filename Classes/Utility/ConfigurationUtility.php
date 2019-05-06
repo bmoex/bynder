@@ -27,17 +27,19 @@ class ConfigurationUtility
     {
         $assetTypes = [];
         if (empty($allowedElements)) {
+            // Defaults to only image & video
             $assetTypes = [BynderDriver::ASSET_TYPE_IMAGE, BynderDriver::ASSET_TYPE_VIDEO];
         } else {
-            $allowedElements = GeneralUtility::trimExplode(',', strtolower($allowedElements), true);
-            $allowed = [
-                BynderDriver::ASSET_TYPE_IMAGE => ((self::getExtensionConfiguration())['asset_type_image'] ?? 'jpg,png,gif'),
-                BynderDriver::ASSET_TYPE_VIDEO => ((self::getExtensionConfiguration())['asset_type_video'] ?? 'mp4,mov')
+            $allowed = GeneralUtility::trimExplode(',', strtolower($allowedElements), true);
+            $possibilities = [
+                BynderDriver::ASSET_TYPE_IMAGE => (self::getExtensionConfiguration())['asset_type_image'] ?? 'jpg,png,gif',
+                BynderDriver::ASSET_TYPE_VIDEO => (self::getExtensionConfiguration())['asset_type_video'] ?? 'mp4,mov',
+                BynderDriver::ASSET_TYPE_AUDIO => (self::getExtensionConfiguration())['asset_type_audio'] ?? 'mp3,wav',
+                BynderDriver::ASSET_TYPE_DOCUMENT => (self::getExtensionConfiguration())['asset_type_document'] ?? 'pdf, doc, docx',
             ];
-
-            foreach (array_filter($allowed) as $key => $elements) {
+            foreach (array_filter($possibilities) as $key => $elements) {
                 foreach (GeneralUtility::trimExplode(',', $elements, true) as $element) {
-                    if (in_array($element, $allowedElements)) {
+                    if (in_array($element, $allowed, true)) {
                         $assetTypes[] = $key;
                         break;
                     }
@@ -71,10 +73,10 @@ class ConfigurationUtility
     {
         $credentials = [
             'baseUrl' => static::getApiBaseUrl(),
-            'consumerKey' => ((self::getExtensionConfiguration())['consumer_key'] ?? ''),
-            'consumerSecret' => ((self::getExtensionConfiguration())['consumer_secret'] ?? ''),
-            'token' => ((self::getExtensionConfiguration())['token_key'] ?? ''),
-            'tokenSecret' => ((self::getExtensionConfiguration())['token_secret'] ?? ''),
+            'consumerKey' => (self::getExtensionConfiguration())['consumer_key'] ?? '',
+            'consumerSecret' => (self::getExtensionConfiguration())['consumer_secret'] ?? '',
+            'token' => (self::getExtensionConfiguration())['token_key'] ?? '',
+            'tokenSecret' => (self::getExtensionConfiguration())['token_secret'] ?? '',
         ];
         return $credentials;
     }

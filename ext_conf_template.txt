@@ -19,8 +19,14 @@ token_secret =
 # cat=basic/API; type=string; label=Image Unavailable: Displayed image when file is not retrievable like when the file status is deleted or unpublished
 image_unavailable = EXT:bynder/Resources/Public/Icons/ImageUnavailable.svg
 
-# cat=basic/assets; type=string; label=File extensions for images; Used for images in your Bynder environment
-asset_type_image = jpg,png,gif
+# cat=basic/assets; type=string; label=File extensions for audio; Used for audio in your Bynder environment
+asset_type_audio = mp4,mov
 
-# cat=basic/assets; type=string; label=File extensions for videos; Extensions used for video interaction in your Bynder environment
-asset_type_video = mp4,mov
+# cat=basic/assets; type=string; label=File extensions for documents; Used for documents in your Bynder environment
+asset_type_document = pdf, doc, docx
+
+# cat=basic/assets; type=string; label=File extensions for images; Used for images in your Bynder environment
+asset_type_image = jpg, png, gif
+
+# cat=basic/assets; type=string; label=File extensions for videos; Used for videos in your Bynder environment
+asset_type_video = mp3, wav

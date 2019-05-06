@@ -14,7 +14,6 @@ use TYPO3\CMS\Core\Resource\Driver\DriverInterface;
 use TYPO3\CMS\Core\Resource\Exception;
 use TYPO3\CMS\Core\Resource\ResourceStorage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
 
 /**
  * Class BynderDriver
@@ -27,6 +26,8 @@ class BynderDriver implements DriverInterface
 
     const ASSET_TYPE_VIDEO = 'video';
     const ASSET_TYPE_IMAGE = 'image';
+    const ASSET_TYPE_DOCUMENT = 'document';
+    const ASSET_TYPE_AUDIO = 'audio';
 
     /**
      * @var string
@@ -205,7 +206,6 @@ class BynderDriver implements DriverInterface
      */
     public function getPublicUrl($identifier)
     {
-        DebuggerUtility::var_dump(__METHOD__);
         return $identifier;
 
         $format = '';

@@ -8,6 +8,6 @@ namespace BeechIt\Bynder\Exception;
  * All code (c) Beech.it all rights reserved
  */
 
-abstract class BynderException extends \Exception
+interface BynderException
 {
 }

@@ -1,111 +1,114 @@
-
 /**
- * Module: BeechIt/Bynder/CompactView
+ * Module: TYPO3/CMS/Bynder/CompactView
  *
  * Javascript for show the Bynder compact view in an overlay/modal
  */
 define(['jquery',
     'nprogress',
     'TYPO3/CMS/Backend/Modal',
-    'TYPO3/CMS/Backend/Severity'
-], function($, NProgress, Modal, Severity) {
+    'TYPO3/CMS/Backend/Notification'
+], function ($, NProgress, Modal, Notification) {
     'use strict';
 
-
     /**
+     * The main CompactView object for Bynder
      *
-     * @param element
-     * @constructor
-     * @exports BeechIt/Bynder/CompactView
+     * @type {{compactViewUrl: string, inlineButton: string, title: string}}
+     * @exports TYPO3/CMS/Bynder/CompactView
      */
-    var CompactViewPlugin = function(element) {
-        var me = this;
-        me.$btn = $(element);
-        me.target = me.$btn.data('target-folder');
-        me.irreObjectUid = me.$btn.data('file-irre-object');
-        me.allowed = me.$btn.data('online-media-allowed');
-        me.$modal = null;
-
-        /**
-         *
-         * @param {Array} media
-         */
-        me.addMedia = function (media) {
-            if (me.$modal) {
-                me.$modal.modal('hide');
-            }
-            NProgress.start();
-            $.post(TYPO3.settings.ajaxUrls['bynder_compact_view_get_files'],
-                {
-                    files: media,
-                    targetFolder: me.target,
-                    allowed: me.allowed
-                },
-                function (data) {
-                    if (data.files.length) {
-                        inline.importElementMultiple(
-                            me.irreObjectUid,
-                            'sys_file',
-                            data.files,
-                            'file'
-                        );
-                    } else {
-                        var $confirm = Modal.confirm(
-                            'ERROR',
-                            data.error,
-                            Severity.error,
-                            [{
-                                text: TYPO3.lang['button.ok'] || 'OK',
-                                btnClass: 'btn-' + Severity.getCssClass(Severity.error),
-                                name: 'ok',
-                                active: true
-                            }]
-                        ).on('confirm.button.ok', function () {
-                            $confirm.modal('hide');
-                        });
-                    }
-                    NProgress.done();
-                }
-            );
-        };
-
-
-        /**
-         * Open the compact view in a modal
-         */
-        me.openModal = function() {
-
-            var settings = me.$btn.data();
-
-            me.$modal = Modal.advanced({
-                type: 'iframe',
-                title: settings.title,
-                content: settings.bynderCompactViewUrl,
-                severity: Severity.default,
-                size: Modal.sizes.full
-            });
-
-        };
+    var BynderCompactView = {
+        inlineButton: '.t3js-bynder-compact-view-btn',
+        compactViewUrl: '',
+        title: 'Pick a file from Bynder'
     };
 
-    $(document).on('click', '.t3js-bynder-compact-view-btn', function(evt) {
-        evt.preventDefault();
+    /**
+     * Initialize all variables and listeners for CompactView
+     *
+     * @private
+     */
+    BynderCompactView.initialize = function () {
+        var $button = $(BynderCompactView.inlineButton);
+        BynderCompactView.compactViewUrl = $button.data('bynderCompactViewUrl');
 
-        var $this = $(this),
-            compactViewPlugin = $this.data('compactViewPlugin');
-        if (!compactViewPlugin) {
-            $this.data('compactViewPlugin', (compactViewPlugin = new CompactViewPlugin(this)));
-        }
-        compactViewPlugin.openModal();
-    });
+        // Add all listeners based on inline button
+        $button.on('click', function (event) {
+            BynderCompactView.open();
+        });
 
-    document.addEventListener('BynderAddMedia', function (e) {
-        console.log('received', e.detail);
-        var $element = $(e.detail.element),
-            compactViewPlugin = $element.data('compactViewPlugin');
-        if (!compactViewPlugin) {
-            $element.data('compactViewPlugin', (compactViewPlugin = new CompactViewPlugin($element)));
-        }
-        compactViewPlugin.addMedia(e.detail.media);
-    });
+        $(document).on('BynderCompactViewAddMedia', function (event) {
+            console.log('received', event.detail);
+            var target = event.detail.target;
+            var media = event.detail.media;
+            if (target && media) {
+                BynderCompactView.addMedia(target, media);
+            }
+        });
+    };
+
+    /**
+     * Open Compact View through CompactViewController
+     *
+     * @private
+     */
+    BynderCompactView.open = function () {
+        Modal.advanced({
+            type: Modal.types.iframe,
+            title: BynderCompactView.title,
+            content: BynderCompactView.compactViewUrl,
+            size: Modal.sizes.full
+        });
+    };
+
+    /**
+     * Add media to irre element in frontend for possible saving
+     *
+     * @param {String} target
+     * @param {Array} media
+     *
+     * @private
+     */
+    BynderCompactView.addMedia = function (target, media) {
+        return $.ajax({
+            type: 'POST',
+            url: TYPO3.settings.ajaxUrls['bynder_compact_view_get_files'],
+            dataType: 'json',
+            data: {
+                target: target,
+                files: media
+            },
+            beforeSend: function () {
+                Modal.dismiss();
+                NProgress.start();
+            },
+            success: function (data) {
+                if (typeof data.files === 'object' && data.files.length) {
+                    inline.importElementMultiple(
+                        target,
+                        'sys_file',
+                        data.files,
+                        'file'
+                    );
+                }
+
+                if (data.message) {
+                    Notification.success('', data.message, Notification.duration);
+                }
+            },
+            error: function (xhr, type) {
+                var data = xhr.responseJSON || {};
+                if (data.error) {
+                    Notification.error('', data.error, Notification.duration);
+                } else {
+                    Notification.error('', 'Unknown ' + type + ' occured.', Notification.duration);
+                }
+            },
+            complete: function () {
+                NProgress.done();
+            }
+        });
+    };
+
+    BynderCompactView.initialize();
+    return BynderCompactView;
 });

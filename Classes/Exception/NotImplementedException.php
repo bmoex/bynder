@@ -8,6 +8,6 @@ namespace BeechIt\Bynder\Exception;
  * All code (c) Beech.it all rights reserved
  */
 
-class NotImplementedException extends BynderException
+class NotImplementedException extends \Exception implements BynderException
 {
 }

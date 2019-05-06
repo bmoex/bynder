@@ -8,6 +8,9 @@ namespace BeechIt\Bynder\Controller;
  * All code (c) Beech.it all rights reserved
  */
 
+use BeechIt\Bynder\Exception\InvalidExtensionConfigurationException;
+use BeechIt\Bynder\Resource\BynderDriver;
+use BeechIt\Bynder\Traits\BynderStorage;
 use BeechIt\Bynder\Utility\ConfigurationUtility;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,6 +26,11 @@ use TYPO3\CMS\Fluid\View\StandaloneView;
  */
 class CompactViewController
 {
+    use BynderStorage;
+
+    const LANGUAGE_ENGLISH = 'en_US';
+    const LANGUAGE_DUTCH = 'nl_NL';
+    const LANGUAGE_SPANISH = 'es_ES';
 
     /**
      * Fluid Standalone View
@@ -70,16 +78,23 @@ class CompactViewController
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
      * @return ResponseInterface
+     * @throws InvalidExtensionConfigurationException
      */
-    public function indexAction(ServerRequestInterface $request, ResponseInterface $response)
+    public function indexAction(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $this->view->setTemplate('Index');
+        $parameters = $request->getQueryParams();
 
         $this->view->assignMultiple([
-            'language' => $this->getBackendUserAuthentication()->uc['lang'] ?: ($this->getBackendUserAuthentication()->user['lang'] ?: 'en_EN'),
-            'apiBaseUrl' => ConfigurationUtility::getApiBaseUrl(),
-            'element' => $request->getQueryParams()['element'],
-            'assetTypes' => $request->getQueryParams()['assetTypes']
+            'configuration' => [
+                'language' => $this->getBackendUserLanguage(),
+                'apiBaseUrl' => ConfigurationUtility::getApiBaseUrl(),
+            ],
+            'parameters' => [
+                'element' => $parameters['element'],
+                'irreObject' => $parameters['irreObject'],
+                'assetTypes' => $parameters['assetTypes']
+            ]
         ]);
 
         $response->getBody()->write($this->view->render());
@@ -94,47 +109,37 @@ class CompactViewController
      * @param ResponseInterface $response
      * @return ResponseInterface
      */
-    public function getFilesAction(ServerRequestInterface $request, ResponseInterface $response)
+    public function getFilesAction(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
-        $files = [];
-        $error = '';
-        $fileStorage = $this->getBynderStorage();
-        foreach ($request->getParsedBody()['files'] ?? [] as $fileIdentifier) {
-            $file = $fileStorage->getFile($fileIdentifier);
-            if ($file instanceof File) {
-                // (Re)Fetch metadata
-                $this->getIndexer($fileStorage)->extractMetaData($file);
-                $files[] = $file->getUid();
+        try {
+            $files = [];
+            $storage = $this->getBynderStorage();
+            $indexer =$this->getIndexer($storage);
+
+            foreach ($request->getParsedBody()['files'] ?? [] as $fileIdentifier) {
+                $file = $storage->getFile($fileIdentifier);
+                if ($file instanceof File) {
+                    // (Re)Fetch metadata
+                    $indexer->extractMetaData($file);
+                    $files[] = $file->getUid();
+                }
             }
-        }
 
-        if ($files === []) {
-            $error = 'No files given/found';
-        }
-
-        $response->getBody()->write(json_encode(['files' => $files, 'error' => $error]));
-        return $response;
-    }
-
-    /**
-     * @return ResourceStorage
-     */
-    protected function getBynderStorage(): ResourceStorage
-    {
-        /** @var ResourceStorage $fileStorage */
-        foreach ($this->getBackendUserAuthentication()->getFileStorages() as $fileStorage) {
-            if ($fileStorage->getDriverType() === 'bynder') {
-                return $fileStorage;
+            if ($files === []) {
+                return $this->createJsonResponse($response, ['error' => 'No files given/found'], 406);
             }
-        }
 
-        throw new \InvalidArgumentException('Missing Bynder file storage');
+            return $this->createJsonResponse($response, ['files' => $files], 201);
+
+        } catch (\Exception $e) {
+            return $this->createJsonResponse($response, ['error' => 'The interaction with Bynder contained conflicts. Please contact the webmasters.'], 404);
+        }
     }
 
     /**
      * @return BackendUserAuthentication
      */
-    protected function getBackendUserAuthentication()
+    protected function getBackendUserAuthentication(): BackendUserAuthentication
     {
         return $GLOBALS['BE_USER'];
     }
@@ -145,8 +150,50 @@ class CompactViewController
      * @param ResourceStorage $storage
      * @return Indexer
      */
-    protected function getIndexer(ResourceStorage $storage)
+    protected function getIndexer(ResourceStorage $storage): Indexer
     {
         return GeneralUtility::makeInstance(Indexer::class, $storage);
+    }
+
+    /**
+     * Safely return possible language keys for CompactView
+     * @return string
+     */
+    protected function getBackendUserLanguage(): string
+    {
+        $language = trim($this->getBackendUserAuthentication()->uc['lang'] ?: $this->getBackendUserAuthentication()->user['lang']);
+        if (empty($language)) {
+            return static::LANGUAGE_ENGLISH;
+        }
+
+        switch (substr($language, 0, 2)) {
+            case 'nl':
+                return static::LANGUAGE_DUTCH;
+            case 'es':
+                return static::LANGUAGE_SPANISH;
+            default:
+                return static::LANGUAGE_ENGLISH;
+        }
+    }
+
+    /**
+     * @param ResponseInterface $response
+     * @param array|null $configuration
+     * @param int $statusCode
+     * @return ResponseInterface
+     */
+    protected function createJsonResponse(ResponseInterface $response, $data, int $statusCode): ResponseInterface
+    {
+        $response = $response
+            ->withStatus($statusCode)
+            ->withHeader('Content-Type', 'application/json; charset=utf-8');
+
+        if (!empty($data)) {
+            $options = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES;
+            $response->getBody()->write(json_encode($data ?: null, $options));
+            $response->getBody()->rewind();
+        }
+
+        return $response;
     }
 }

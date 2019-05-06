@@ -8,6 +8,6 @@ namespace BeechIt\Bynder\Exception;
  * All code (c) Beech.it all rights reserved
  */
 
-class InvalidExtensionConfigurationException extends BynderException
+class InvalidExtensionConfigurationException extends \InvalidArgumentException implements BynderException
 {
 }

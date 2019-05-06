@@ -8,5 +8,7 @@ call_user_func(function ($extension, $table) {
             'addFileViaBynder',
             'permissions-bynder-compact-view'
         ],
-        'addFile', 'after');
+        'addFile',
+        'after'
+    );
 }, 'bynder', 'be_users');
