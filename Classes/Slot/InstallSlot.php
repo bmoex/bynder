@@ -7,6 +7,7 @@ namespace BeechIt\Bynder\Slot;
  * Date: 27-2-18
  * All code (c) Beech.it all rights reserved
  */
+
 use BeechIt\Bynder\Resource\BynderDriver;
 use TYPO3\CMS\Core\Database\ConnectionPool;
 use TYPO3\CMS\Core\Resource\StorageRepository;
@@ -50,7 +51,7 @@ class InstallSlot
             'is_public' => 1,
             'is_writable' => 0,
             'is_default' => 0,
-             // We use the processed file folder of the default storage as fallback
+            // We use the processed file folder of the default storage as fallback
             'processingfolder' => '1:/_processed_/',
         ];
 

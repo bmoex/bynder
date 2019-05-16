@@ -7,9 +7,14 @@ namespace BeechIt\Bynder\Service;
  * Date: 19-2-18
  * All code (c) Beech.it all rights reserved
  */
+
+use BeechIt\Bynder\Exception\InvalidArgumentException;
 use BeechIt\Bynder\Utility\ConfigurationUtility;
 use Bynder\Api\BynderApiFactory;
+use Bynder\Api\Impl\BynderApi;
+use DateTime;
 use TYPO3\CMS\Core\Cache\CacheManager;
+use TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException;
 use TYPO3\CMS\Core\Cache\Frontend\FrontendInterface;
 use TYPO3\CMS\Core\SingletonInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -25,7 +30,7 @@ class BynderService implements SingletonInterface
     protected $bynderIntegrationId = '8517905e-6c2f-47c3-96ca-0312027bbc95';
 
     /**
-     * @var \Bynder\Api\Impl\BynderApi
+     * @var BynderApi
      */
     protected $bynderApi;
 
@@ -35,18 +40,22 @@ class BynderService implements SingletonInterface
     protected $cache;
 
     /**
-     * @return \Bynder\Api\Impl\BynderApi
-     * @throws \InvalidArgumentException
+     * @return BynderApi
+     * @throws InvalidArgumentException
      */
-    public function getBynderApi()
+    public function getBynderApi(): BynderApi
     {
-        return BynderApiFactory::create(ConfigurationUtility::getBynderApiFactoryCredentials());
+        try {
+            return BynderApiFactory::create(ConfigurationUtility::getBynderApiFactoryCredentials());
+        } catch (InvalidArgumentException $e) {
+            throw new InvalidArgumentException('BynderApi cannot be created', 1559128418168, $e);
+        }
     }
 
     /**
      * @param string $uuid
      * @return array
-     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
+     * @throws NoSuchCacheException
      */
     public function getMediaInfo(string $uuid): array
     {
@@ -63,10 +72,10 @@ class BynderService implements SingletonInterface
      * @param string $uuid
      * @param string $uri
      * @param string|null $additionalInfo
-     * @param \DateTime|null $dateTime
+     * @param DateTime|null $dateTime
      * @return bool
      */
-    public function addAssetUsage(string $uuid, string $uri, string $additionalInfo = null, \DateTime $dateTime = null): bool
+    public function addAssetUsage(string $uuid, string $uri, string $additionalInfo = null, DateTime $dateTime = null): bool
     {
         try {
             $usage = $this->getBynderApi()->getAssetBankManager()->createUsage([
@@ -74,9 +83,9 @@ class BynderService implements SingletonInterface
                 'asset_id' => $uuid,
                 'uri' => $uri,
                 'additional' => $additionalInfo,
-                'timestamp' => ($dateTime ?? new \DateTime())->format('c'),
+                'timestamp' => ($dateTime ?? new DateTime())->format('c'),
             ])->wait();
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
+        } catch (\Exception $e) {
             $usage = null;
         }
 
@@ -91,22 +100,21 @@ class BynderService implements SingletonInterface
     public function deleteAssetUsage(string $uuid, string $uri): bool
     {
         try {
-            $response = $this->getBynderApi()->getAssetBankManager()->deleteUSage([
+            $response = $this->getBynderApi()->getAssetBankManager()->deleteUsage([
                 'integration_id' => $this->bynderIntegrationId,
                 'asset_id' => $uuid,
                 'uri' => $uri,
             ])->wait();
-        } catch (\GuzzleHttp\Exception\RequestException $e) {
+        } catch (\Exception $e) {
             $response = null;
         }
 
         return $response !== null && $response->getStatusCode() === 204;
     }
 
-
     /**
      * @return FrontendInterface
-     * @throws \TYPO3\CMS\Core\Cache\Exception\NoSuchCacheException
+     * @throws NoSuchCacheException
      */
     protected function getCache(): FrontendInterface
     {

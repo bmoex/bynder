@@ -8,6 +8,6 @@ namespace BeechIt\Bynder\Exception;
  * All code (c) Beech.it all rights reserved
  */
 
-class InvalidPropertyException extends \InvalidArgumentException implements BynderException
+class InvalidArgumentException extends \InvalidArgumentException implements BynderException
 {
 }

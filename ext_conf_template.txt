@@ -20,7 +20,7 @@ token_secret =
 image_unavailable = EXT:bynder/Resources/Public/Icons/ImageUnavailable.svg
 
 # cat=basic/assets; type=string; label=File extensions for audio; Used for audio in your Bynder environment
-asset_type_audio = mp4,mov
+asset_type_audio = mp4, mov
 
 # cat=basic/assets; type=string; label=File extensions for documents; Used for documents in your Bynder environment
 asset_type_document = pdf, doc, docx

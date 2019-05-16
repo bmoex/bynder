@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.0">
+    <file source-language="en" datatype="plaintext" original="messages" date="2018-02-20T11:13:11Z" product-name="bynder">
+        <header/>
+        <body>
+            <trans-unit id="javascript_required">
+                <source><![CDATA[To view this %s please enable JavaScript, and consider upgrading to a web browser
+                that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5</a>]]></source>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

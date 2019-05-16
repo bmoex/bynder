@@ -13,6 +13,15 @@
             </trans-unit>
             <trans-unit id="compact_view.error-no-storage-access">
                 <source>Please make sure you have access to the Bynder file mount. This is needed to use the Bynder file picker</source>
+                <target>Zorg voor toegang tot de Bynder file mount. Dit is nodig voor de Bynder CompactView.</target>
+            </trans-unit>
+            <trans-unit id="be_groups.file_permissions.folder_add_via_bynder">
+                <source>Files: Add via Bynder</source>
+                <target>Bestanden: toevoegen via Bynder</target>
+            </trans-unit>
+            <trans-unit id="be_users.file_permissions.folder_add_via_bynder">
+                <source>Files: Add via Bynder</source>
+                <target>Bestanden: toevoegen via Bynder</target>
             </trans-unit>
         </body>
     </file>

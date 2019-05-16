@@ -17,9 +17,9 @@ class TagBuilderService
      * @param string $content
      * @return TagBuilder
      */
-    public function getTagBuilder($name = '', $content = '')
+    public function getTagBuilder($name = '', $content = ''): TagBuilder
     {
-        return GeneralUtility::makeInstance(\TYPO3Fluid\Fluid\Core\ViewHelper\TagBuilder::class, $name, $content);
+        return GeneralUtility::makeInstance(TagBuilder::class, $name, $content);
     }
 
     /**

@@ -22,26 +22,21 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers']['bynder'] = [
 ];
 
 // Register slot to use Bynder API for processed file
-$signalSlotDispatcher = \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class);
-$signalSlotDispatcher->connect(
+\TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class)
+    ->connect(
     \TYPO3\CMS\Extensionmanager\Utility\InstallUtility::class,
     'afterExtensionInstall',
     \BeechIt\Bynder\Slot\InstallSlot::class,
     'createBynderFileStorage'
 );
-unset($signalSlotDispatcher);
 
-$GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['onlineMediaHelpers']['bynder'] = \BeechIt\Bynder\Resource\Helper\BynderHelper::class;
-
-$rendererRegistry = \TYPO3\CMS\Core\Resource\Rendering\RendererRegistry::getInstance();
-$rendererRegistry->registerRendererClass(\BeechIt\Bynder\Resource\Rendering\BynderVideoRenderer::class);
-$rendererRegistry->registerRendererClass(\BeechIt\Bynder\Resource\Rendering\BynderImageRenderer::class);
-unset($rendererRegistry);
+\TYPO3\CMS\Core\Resource\Rendering\RendererRegistry::getInstance()
+    ->registerRendererClass(\BeechIt\Bynder\Resource\Rendering\AssetRenderer::class);
 
 // Register hooks to post/delete usage registration
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass'][] =
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processDatamapClass']['bynder'] =
     \BeechIt\Bynder\Hook\DataHandlerHook::class;
-$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass'][] =
+$GLOBALS['TYPO3_CONF_VARS']['SC_OPTIONS']['t3lib/class.t3lib_tcemain.php']['processCmdmapClass']['bynder'] =
     \BeechIt\Bynder\Hook\DataHandlerHook::class;
 
 // Register BynderAPI cache
@@ -64,9 +59,8 @@ $iconRegistry->registerIcon(
 unset($iconRegistry);
 
 // Register the extractor to fetch metadata from Bynder
-$extractorRegistry = \TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance();
-$extractorRegistry->registerExtractionService(\BeechIt\Bynder\Resource\Index\Extractor::class);
-unset($extractorRegistry);
+\TYPO3\CMS\Core\Resource\Index\ExtractorRegistry::getInstance()
+    ->registerExtractionService(\BeechIt\Bynder\Resource\Index\Extractor::class);
 
 if (!\TYPO3\CMS\Core\Core\Bootstrap::usesComposerClassLoading()) {
     require_once(\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::extPath('bynder')

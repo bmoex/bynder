@@ -5,6 +5,7 @@ CHANGELOG
 -----
 
 * Added option to enable/disable [Bynder CompactView](https://developer-docs.bynder.com/UI%20components/#compact-view) button
+* Upgraded [Bynder CompactView](https://developer-docs.bynder.com/UI%20components/#compact-view) to version 1.5.0
 * Added workflow and configuration for unavailable image
 * Added changelog
 * Updated documentation 

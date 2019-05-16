@@ -3,8 +3,9 @@
 namespace BeechIt\Bynder\Utility;
 
 use BeechIt\Bynder\Exception\InvalidExtensionConfigurationException;
-use BeechIt\Bynder\Resource\BynderDriver;
+use BeechIt\Bynder\Resource\Asset;
 use TYPO3\CMS\Core\Configuration\ExtensionConfiguration;
+use TYPO3\CMS\Core\Utility\ArrayUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\PathUtility;
 use TYPO3\CMS\Extbase\Object\ObjectManager;
@@ -28,14 +29,14 @@ class ConfigurationUtility
         $assetTypes = [];
         if (empty($allowedElements)) {
             // Defaults to only image & video
-            $assetTypes = [BynderDriver::ASSET_TYPE_IMAGE, BynderDriver::ASSET_TYPE_VIDEO];
+            $assetTypes = [Asset::TYPE_IMAGE, Asset::TYPE_VIDEO];
         } else {
             $allowed = GeneralUtility::trimExplode(',', strtolower($allowedElements), true);
             $possibilities = [
-                BynderDriver::ASSET_TYPE_IMAGE => (self::getExtensionConfiguration())['asset_type_image'] ?? 'jpg,png,gif',
-                BynderDriver::ASSET_TYPE_VIDEO => (self::getExtensionConfiguration())['asset_type_video'] ?? 'mp4,mov',
-                BynderDriver::ASSET_TYPE_AUDIO => (self::getExtensionConfiguration())['asset_type_audio'] ?? 'mp3,wav',
-                BynderDriver::ASSET_TYPE_DOCUMENT => (self::getExtensionConfiguration())['asset_type_document'] ?? 'pdf, doc, docx',
+                Asset::TYPE_IMAGE => (self::getExtensionConfiguration())['asset_type_image'] ?? 'jpg,png,gif',
+                Asset::TYPE_VIDEO => (self::getExtensionConfiguration())['asset_type_video'] ?? 'mp4,mov',
+                Asset::TYPE_AUDIO => (self::getExtensionConfiguration())['asset_type_audio'] ?? 'mp3,wav',
+                Asset::TYPE_DOCUMENT => (self::getExtensionConfiguration())['asset_type_document'] ?? 'pdf, doc, docx',
             ];
             foreach (array_filter($possibilities) as $key => $elements) {
                 foreach (GeneralUtility::trimExplode(',', $elements, true) as $element) {
@@ -136,7 +137,7 @@ class ConfigurationUtility
                     $configuration[$key] = $value['value'];
                 }
             } else {
-                \TYPO3\CMS\Core\Utility\ArrayUtility::mergeRecursiveWithOverrule($configuration, (array)$objectManager->get(ExtensionConfiguration::class)->get('bynder'));
+                ArrayUtility::mergeRecursiveWithOverrule($configuration, (array)$objectManager->get(ExtensionConfiguration::class)->get('bynder'));
             }
 
             if (empty($configuration['url']) ||

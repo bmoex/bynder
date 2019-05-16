@@ -18,10 +18,6 @@
             <trans-unit id="be_users.file_permissions.folder_add_via_bynder">
                 <source>Files: Add via Bynder</source>
             </trans-unit>
-            <trans-unit id="bynder.video.javascript_required">
-                <source><![CDATA[To view this video please enable JavaScript, and consider upgrading to a web browser
-                that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>]]></source>
-            </trans-unit>
         </body>
     </file>
 </xliff>

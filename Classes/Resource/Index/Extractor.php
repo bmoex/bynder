@@ -7,20 +7,24 @@ namespace BeechIt\Bynder\Resource\Index;
  * Date: 20-2-18
  * All code (c) Beech.it all rights reserved
  */
+
 use BeechIt\Bynder\Resource\BynderDriver;
+use BeechIt\Bynder\Traits\AssetFactory;
 use TYPO3\CMS\Core\Resource;
 use TYPO3\CMS\Core\Utility\ArrayUtility;
-use TYPO3\CMS\Extbase\Utility\DebuggerUtility;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 /**
  * Class Extractor
  */
 class Extractor implements Resource\Index\ExtractorInterface
 {
+    use AssetFactory;
+
     /**
      * @return array
      */
-    public function getFileTypeRestrictions()
+    public function getFileTypeRestrictions(): array
     {
         return [];
     }
@@ -28,7 +32,7 @@ class Extractor implements Resource\Index\ExtractorInterface
     /**
      * @return array
      */
-    public function getDriverRestrictions()
+    public function getDriverRestrictions(): array
     {
         return [BynderDriver::KEY];
     }
@@ -36,7 +40,7 @@ class Extractor implements Resource\Index\ExtractorInterface
     /**
      * @return int
      */
-    public function getPriority()
+    public function getPriority(): int
     {
         return 10;
     }
@@ -44,7 +48,7 @@ class Extractor implements Resource\Index\ExtractorInterface
     /**
      * @return int
      */
-    public function getExecutionPriority()
+    public function getExecutionPriority(): int
     {
         return 10;
     }
@@ -53,9 +57,9 @@ class Extractor implements Resource\Index\ExtractorInterface
      * @param Resource\File $file
      * @return bool
      */
-    public function canProcess(Resource\File $file)
+    public function canProcess(Resource\File $file): bool
     {
-        return Resource\OnlineMedia\Helpers\OnlineMediaHelperRegistry::getInstance()->getOnlineMediaHelper($file) !== false;
+        return GeneralUtility::isFirstPartOfStr($file->getMimeType(), 'bynder/');
     }
 
     /**
@@ -65,12 +69,21 @@ class Extractor implements Resource\Index\ExtractorInterface
      * @param array $previousExtractedData
      * @return array
      */
-    public function extractMetaData(Resource\File $file, array $previousExtractedData = [])
+    public function extractMetaData(Resource\File $file, array $previousExtractedData = []): array
     {
-        /** @var Resource\OnlineMedia\Helpers\OnlineMediaHelperInterface $helper */
-        $helper = Resource\OnlineMedia\Helpers\OnlineMediaHelperRegistry::getInstance()->getOnlineMediaHelper($file);
-        $output = $previousExtractedData;
-        ArrayUtility::mergeRecursiveWithOverrule($output, ($helper !== false ? $helper->getMetaData($file) : []));
-        return $output;
+        $asset = $this->getAsset($file->getIdentifier());
+        $expectedData = [
+            'title',
+            'description',
+            'copyright',
+            'keywords',
+        ];
+        if ($asset->isImage()) {
+            ArrayUtility::mergeRecursiveWithOverrule($expectedData, [
+                'height',
+                'width'
+            ]);
+        }
+        return $asset->extractProperties($expectedData);
     }
 }

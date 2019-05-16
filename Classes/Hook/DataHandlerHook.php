@@ -7,8 +7,10 @@ namespace BeechIt\Bynder\Hook;
  * Date: 23-2-18
  * All code (c) Beech.it all rights reserved
  */
+
 use BeechIt\Bynder\Resource\BynderDriver;
 use BeechIt\Bynder\Service\BynderService;
+use InvalidArgumentException;
 use TYPO3\CMS\Backend\Utility\BackendUtility;
 use TYPO3\CMS\Core\DataHandling\DataHandler;
 use TYPO3\CMS\Core\Resource\Exception\FileDoesNotExistException;
@@ -60,7 +62,7 @@ class DataHandlerHook
             $file = ResourceFactory::getInstance()->getFileObject($record['uid_local']);
         } catch (FileDoesNotExistException $e) {
             return;
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return;
         }
 
@@ -102,7 +104,7 @@ class DataHandlerHook
             $file = ResourceFactory::getInstance()->getFileObject($record['uid_local']);
         } catch (FileDoesNotExistException $e) {
             return;
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return;
         }
 

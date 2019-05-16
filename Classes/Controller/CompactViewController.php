@@ -9,9 +9,9 @@ namespace BeechIt\Bynder\Controller;
  */
 
 use BeechIt\Bynder\Exception\InvalidExtensionConfigurationException;
-use BeechIt\Bynder\Resource\BynderDriver;
 use BeechIt\Bynder\Traits\BynderStorage;
 use BeechIt\Bynder\Utility\ConfigurationUtility;
+use Exception;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use TYPO3\CMS\Core\Authentication\BackendUserAuthentication;
@@ -114,7 +114,7 @@ class CompactViewController
         try {
             $files = [];
             $storage = $this->getBynderStorage();
-            $indexer =$this->getIndexer($storage);
+            $indexer = $this->getIndexer($storage);
 
             foreach ($request->getParsedBody()['files'] ?? [] as $fileIdentifier) {
                 $file = $storage->getFile($fileIdentifier);
@@ -130,9 +130,14 @@ class CompactViewController
             }
 
             return $this->createJsonResponse($response, ['files' => $files], 201);
-
-        } catch (\Exception $e) {
-            return $this->createJsonResponse($response, ['error' => 'The interaction with Bynder contained conflicts. Please contact the webmasters.'], 404);
+        } catch (Exception $e) {
+            return $this->createJsonResponse($response, [
+                'error' => 'The interaction with Bynder contained conflicts. Please contact the webmasters.',
+                'exception' => [
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage()
+                ],
+            ], 404);
         }
     }
 
@@ -178,7 +183,7 @@ class CompactViewController
 
     /**
      * @param ResponseInterface $response
-     * @param array|null $configuration
+     * @param array|null $data
      * @param int $statusCode
      * @return ResponseInterface
      */

@@ -8,6 +8,11 @@ namespace BeechIt\Bynder\Exception;
  * All code (c) Beech.it all rights reserved
  */
 
+/**
+ * Interface: Implemented by all extension specific exceptions
+ * @package BeechIt\Bynder\Exception
+ * @mixin \Exception
+ */
 interface BynderException
 {
 }
