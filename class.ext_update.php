@@ -3,12 +3,11 @@
 namespace BeechIt\Bynder;
 
 use BeechIt\Bynder\Traits\BynderService;
-use BeechIt\Bynder\Utility\ConfigurationUtility;
 use TYPO3\CMS\Core\Utility\MathUtility;
-use TYPO3\CMS\Fluid\ViewHelpers\Be\InfoboxViewHelper;
 
 /**
  * Class for validating information
+ * @package BeechIt\Bynder
  */
 class ext_update
 {
@@ -36,6 +35,9 @@ class ext_update
 
     use BynderService;
 
+    /**
+     * @return string
+     */
     public function main(): string
     {
         $content = '';

@@ -24,10 +24,10 @@ $GLOBALS['TYPO3_CONF_VARS']['SYS']['fal']['registeredDrivers']['bynder'] = [
 // Register slot to use Bynder API for processed file
 \TYPO3\CMS\Core\Utility\GeneralUtility::makeInstance(\TYPO3\CMS\Extbase\SignalSlot\Dispatcher::class)
     ->connect(
-    \TYPO3\CMS\Extensionmanager\Utility\InstallUtility::class,
-    'afterExtensionInstall',
-    \BeechIt\Bynder\Slot\InstallSlot::class,
-    'createBynderFileStorage'
+        \TYPO3\CMS\Extensionmanager\Utility\InstallUtility::class,
+        'afterExtensionInstall',
+        \BeechIt\Bynder\Slot\InstallSlot::class,
+        'createBynderFileStorage'
 );
 
 \TYPO3\CMS\Core\Resource\Rendering\RendererRegistry::getInstance()
