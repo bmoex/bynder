@@ -78,12 +78,17 @@ class Extractor implements Resource\Index\ExtractorInterface
             'copyright',
             'keywords',
         ];
-        if ($asset->isImage()) {
+        if ($asset->isImage() || $asset->isDocument()) {
             ArrayUtility::mergeRecursiveWithOverrule($expectedData, [
                 'height',
                 'width'
             ]);
         }
-        return $asset->extractProperties($expectedData);
+        $meta = $asset->extractProperties($expectedData);
+
+        if ($asset->isDocument()) {
+            $meta['link'] = 't3://file?uid=' . $file->getUid();
+        }
+        return $meta;
     }
 }
