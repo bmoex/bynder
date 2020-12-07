@@ -1,22 +1,29 @@
-<div id="bynder-compactview"
-     data-assetTypes="{parameters.assetTypes}"
-     data-autoload="true"
-     data-collections="false"
-     data-defaultEnvironment="{configuration.apiBaseUrl}"
-     data-folder="bynder-compactview"
-     data-fullScreen="true"
-     data-header="false"
-     data-language="{configuration.language}"
-     data-mode="multi"
-     data-zindex="300"
-     data-modal="false"
-></div>
+<html xmlns:f="http://typo3.org/ns/TYPO3/CMS/Fluid/ViewHelpers"
+      data-namespace-typo3-fluid="true">
+
+<f:cache.static>
+    <div id="bynder-compactview"
+         data-assetTypes="{parameters.assetTypes}"
+         data-autoload="true"
+         data-collections="false"
+         data-defaultEnvironment="{configuration.apiBaseUrl}"
+         data-folder="bynder-compactview"
+         data-fullScreen="true"
+         data-header="false"
+         data-language="{configuration.language}"
+         data-mode="multi"
+         data-zindex="300"
+         data-modal="false"
+         data-irreObject="{parameters.irreObject}"
+    ></div>
+</f:cache.static>
+
 <script src="https://d8ejoa1fys2rk.cloudfront.net/modules/compactview/includes/js/client-1.5.0.min.js"></script>
 
 <script>
     /** Add external listener for Bynder's Compact View interaction */
     document.addEventListener('BynderAddMedia', function (e) {
-        var target = '{parameters.irreObject}';
+        var target = document.getElementById('bynder-compactview').dataset.irreobject;
         var media = [],
             selectedAssets = e.detail;
         for (var i = 0; i < selectedAssets.length; i++) {
@@ -50,3 +57,4 @@
     });
 </script>
 
+</html>
