@@ -10,13 +10,15 @@
      data-mode="multi"
      data-zindex="300"
      data-modal="false"
+     data-irreObject="{parameters.irreObject}"
 ></div>
+<f:spaceless></f:spaceless>
 <script src="https://d8ejoa1fys2rk.cloudfront.net/modules/compactview/includes/js/client-1.5.0.min.js"></script>
 
 <script>
     /** Add external listener for Bynder's Compact View interaction */
     document.addEventListener('BynderAddMedia', function (e) {
-        var target = '{parameters.irreObject}';
+        var target = document.getElementById('bynder-compactview').dataset.irreobject;
         var media = [],
             selectedAssets = e.detail;
         for (var i = 0; i < selectedAssets.length; i++) {
